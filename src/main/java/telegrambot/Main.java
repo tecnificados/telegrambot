@@ -9,13 +9,11 @@ public class Main {
 	
 	private static final Logger logger = LoggerFactory.getLogger(Main.class);
 	
-	private static final String BOT_TOKEN = "-----";
-
-	
 	public static void main(String[] args) {
 		try {
+			BotConfig config = new BotConfig();
 			TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-			botsApi.registerBot(new MySimpleBot(BOT_TOKEN));
+			botsApi.registerBot(new MySimpleBot(config.getBotToken(), config.getBotUsername()));
 		} catch (Exception e) {
 			logger.error("Error running bot", e);
 		}
