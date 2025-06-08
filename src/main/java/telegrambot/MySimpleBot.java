@@ -44,7 +44,7 @@ public class MySimpleBot extends TelegramLongPollingBot {
             if (languageCode!=null && languageCode.equals("es")) {
             	message.setText("Hola " +firstName+", me acabas de escribir: "+ userMessage);
             }else {
-            	message.setText("Hello " +firstName+", you just write me: "+ userMessage);	
+            	message.setText("Hello " +firstName+", you just messaged me this: "+ userMessage);	
             }
             
             try {
