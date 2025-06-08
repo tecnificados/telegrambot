@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
-//import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -30,18 +30,23 @@ public class MySimpleBot extends TelegramLongPollingBot {
             String userMessage = update.getMessage().getText();
             String chatId = update.getMessage().getChatId().toString();
             
-            /*
+          
             User user = update.getMessage().getFrom();            
-            Long userId = user.getId();
+            //Long userId = user.getId();
             String firstName = user.getFirstName();
-            String lastName = user.getLastName();
-            String username = user.getUserName();
-            */
+            //String lastName = user.getLastName();
+            //String username = user.getUserName();
+            String languageCode = user.getLanguageCode();
+            logger.info("language: "+languageCode);
 
             SendMessage message = new SendMessage();
             message.setChatId(chatId);
-            message.setText("Echo: " + userMessage);
-
+            if (languageCode!=null && languageCode.equals("es")) {
+            	message.setText("Hola " +firstName+", me acabas de escribir: "+ userMessage);
+            }else {
+            	message.setText("Hello " +firstName+", you just write me: "+ userMessage);	
+            }
+            
             try {
                 execute(message);
             } catch (TelegramApiException e) {
