@@ -5,9 +5,25 @@
       <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
     </encoder>
   </appender>
+  
+  <!-- Appender para fichero con rotación diaria -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>logs/app.log</file> <!-- Ruta del archivo actual -->
+
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>logs/app.%d{yyyy-MM-dd}.log</fileNamePattern> <!-- Formato de los archivos rotados -->
+      <maxHistory>10</maxHistory> <!-- Mantener 10 días de logs -->
+      <cleanHistoryOnStart>true</cleanHistoryOnStart> <!-- Limpieza al arrancar -->
+    </rollingPolicy>
+    
+    <encoder>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+    </encoder>
+  </appender>
 
   <root level="INFO">
     <appender-ref ref="CONSOLE" />
+    <appender-ref ref="FILE" />
   </root>
 
 
