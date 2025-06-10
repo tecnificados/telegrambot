@@ -30,5 +30,12 @@ public class BotConfig {
     public String getBotToken() {
         return botToken;
     }
+
+	@Override
+	public String toString() {
+		return "BotConfig [botUsername=" + botUsername + ", botToken=" + botToken + "]";
+	}
+    
+    
 }
 

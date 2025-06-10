@@ -12,6 +12,7 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			BotConfig config = new BotConfig();
+			logger.info(config.toString());
 			TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
 			botsApi.registerBot(new MySimpleBot(config.getBotToken(), config.getBotUsername()));
 		} catch (Exception e) {
