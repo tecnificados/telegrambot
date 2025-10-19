@@ -93,8 +93,19 @@ public class Utils {
     		return "";
     	}
         // Configurar Selenium en modo headless
+    	String userDataDir = Files.createTempDirectory("chrome-user-data").toAbsolutePath().toString();
+
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless", "--window-size=600,400");
+        options.addArguments("--headless=new");
+        options.addArguments("--window-size=600,400");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--user-data-dir=" + userDataDir); // <--- clave
+        
+        
+        
+        
+        
         WebDriver driver = new ChromeDriver(options);
 
         // Abrir el HTML localmente
