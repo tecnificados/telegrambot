@@ -1,6 +1,8 @@
 package telegrambot;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,15 +11,21 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-
+import java.util.ArrayList;
+import java.util.List;
+import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import telegrambot.cards.Carta;
+import telegrambot.cards.SpriteDeckLoader;
 
 public class MySimpleBot extends TelegramLongPollingBot {
 
@@ -25,11 +33,20 @@ public class MySimpleBot extends TelegramLongPollingBot {
 	
     private final String BOT_USERNAME;
     private final String BOT_TOKEN;
+    
+    List<Carta> mazo = new ArrayList<Carta>();
    
 	public MySimpleBot(String botToken, String userName) {
 		super(botToken);
 		BOT_USERNAME=userName;
 		BOT_TOKEN=botToken;
+		
+		try {
+            mazo = SpriteDeckLoader.loadDeck();           
+        } catch (IOException e) {
+            logger.error("Error loading cards", e);
+        }
+		
 	}
 
 	@Override
@@ -41,8 +58,7 @@ public class MySimpleBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String userMessage = update.getMessage().getText();
-            String chatId = update.getMessage().getChatId().toString();
-            
+            String chatId = update.getMessage().getChatId().toString();            
           
             User user = update.getMessage().getFrom();            
             //Long userId = user.getId();
@@ -54,17 +70,48 @@ public class MySimpleBot extends TelegramLongPollingBot {
 
             SendMessage message = new SendMessage();
             message.setChatId(chatId);
-            if (languageCode!=null && languageCode.equals("es")) {
-            	message.setText("Hola " +firstName+", me acabas de escribir: "+ userMessage);
-            }else {
-            	message.setText("Hello " +firstName+", you just messaged me this: "+ userMessage);	
-            }
             
-            try {
-                execute(message);
-            } catch (TelegramApiException e) {
-                logger.error("Error sending message", e);
+            String userMessageCleaned=userMessage.toLowerCase().trim();            
+            
+            //TODO another refactor ASAP
+            if (languageCode!=null && languageCode.equals("es") && (userMessageCleaned.equals("carta") || userMessageCleaned.equals("card"))) {
+            	Carta carta = mazo.get(Utils.randomNumber(0, mazo.size()));
+            	String nombreCarta=carta.getValor()+" de "+carta.getPalo();
+	            try
+	            {	            	
+	            	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	                ImageIO.write(carta.getImagen(), "png", baos);
+	                baos.flush();
+	
+	                // Crear InputStream para Telegram
+	                ByteArrayInputStream inputStream = new ByteArrayInputStream(baos.toByteArray());
+	                InputFile inputFile = new InputFile(inputStream, carta.getValor()+"_"+carta.getPalo()  + ".png");
+	                
+	                SendPhoto sendPhoto = new SendPhoto();
+	                sendPhoto.setChatId(chatId.toString());
+	                sendPhoto.setPhoto(inputFile);
+	                sendPhoto.setCaption(nombreCarta);
+	
+	                execute(sendPhoto);
+	
+	                baos.close();
+	                inputStream.close();
+	            } catch (IOException | TelegramApiException e) {
+	                logger.error("Error sending card", e);
+	            }            	
             }
+            else {
+	            if (languageCode!=null && languageCode.equals("es")) {
+	            	message.setText("Hola " +firstName+", me acabas de escribir: "+ userMessage);
+	            }else {
+	            	message.setText("Hello " +firstName+", you just messaged me this: "+ userMessage);	
+	            }
+	            try {
+	                execute(message);
+	            } catch (TelegramApiException e) {
+	                logger.error("Error sending message", e);
+	            }
+            }           
         }else if (update.hasMessage() && update.getMessage().hasLocation()) {
             Location userLocation = update.getMessage().getLocation();
             String chatId = update.getMessage().getChatId().toString();

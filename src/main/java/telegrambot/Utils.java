@@ -2,20 +2,20 @@ package telegrambot;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.WebDriver;
-import java.nio.file.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,6 +24,15 @@ public class Utils {
 	//TODO extract selenium util to another class
 	
 	private static final Logger logger = LoggerFactory.getLogger(Utils.class);
+	
+	public static Random random = new Random();	
+	
+	public static int randomNumber(int min, int max) {
+	    if (min > max) {
+	        return random.nextInt((min - max) + 1) + min;
+	    }	   
+	    return random.nextInt((max - min) + 1) + min;
+	}
 
 	public static String coordinateToGeojsonPoint(double lat, double lon)
 	{
