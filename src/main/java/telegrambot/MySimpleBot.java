@@ -1,5 +1,6 @@
 package telegrambot;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.imageio.ImageIO;
 import org.slf4j.Logger;
@@ -86,6 +88,39 @@ public class MySimpleBot extends TelegramLongPollingBot {
 	                // Crear InputStream para Telegram
 	                ByteArrayInputStream inputStream = new ByteArrayInputStream(baos.toByteArray());
 	                InputFile inputFile = new InputFile(inputStream, carta.getValor()+"_"+carta.getPalo()  + ".png");
+	                
+	                SendPhoto sendPhoto = new SendPhoto();
+	                sendPhoto.setChatId(chatId.toString());
+	                sendPhoto.setPhoto(inputFile);
+	                sendPhoto.setCaption(nombreCarta);
+	
+	                execute(sendPhoto);
+	
+	                baos.close();
+	                inputStream.close();
+	            } catch (IOException | TelegramApiException e) {
+	                logger.error("Error sending card", e);
+	            }            	
+            } else if (languageCode!=null && languageCode.equals("es") && (userMessageCleaned.equals("mano") || userMessageCleaned.equals("hand"))) {
+            	List<Carta> myDeck = new ArrayList<Carta>();
+            	myDeck.addAll(mazo);
+            	Collections.shuffle(myDeck);
+            	List<Carta> pokerHand = myDeck.subList(0, 5);
+            	
+            	List<BufferedImage> images = pokerHand.stream().map(c -> c.getImagen()).toList();
+                BufferedImage combined = Utils.combineCardsOverlapping(images);            	
+        
+            	String nombreCarta="Una mano de poker";
+	            try
+	            {	     
+	            	
+	            	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	                ImageIO.write(combined, "png", baos);
+	                baos.flush();
+	
+	                // Crear InputStream para Telegram
+	                ByteArrayInputStream inputStream = new ByteArrayInputStream(baos.toByteArray());
+	                InputFile inputFile = new InputFile(inputStream, "pokerHand"  + ".png");
 	                
 	                SendPhoto sendPhoto = new SendPhoto();
 	                sendPhoto.setChatId(chatId.toString());

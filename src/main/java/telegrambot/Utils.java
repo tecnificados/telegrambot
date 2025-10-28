@@ -1,13 +1,18 @@
 package telegrambot;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebDriver;
@@ -16,6 +21,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -26,6 +32,42 @@ public class Utils {
 	private static final Logger logger = LoggerFactory.getLogger(Utils.class);
 	
 	public static Random random = new Random();	
+		
+	public static BufferedImage combineCards(List<BufferedImage> cards) {
+	    int cardWidth = cards.get(0).getWidth();
+	    int cardHeight = cards.get(0).getHeight();
+	    int spacing = 10; // espacio entre cartas
+
+	    int totalWidth = cardWidth * cards.size() + spacing * (cards.size() - 1);
+	    BufferedImage combined = new BufferedImage(totalWidth, cardHeight, BufferedImage.TYPE_INT_ARGB);
+	    Graphics2D g2d = combined.createGraphics();
+
+	    for (int i = 0; i < cards.size(); i++) {
+	        int x = i * (cardWidth + spacing);
+	        g2d.drawImage(cards.get(i), x, 0, null);
+	    }
+
+	    g2d.dispose();
+	    return combined;
+	}
+	
+	public static BufferedImage combineCardsOverlapping(List<BufferedImage> cards) {
+	    int cardWidth = cards.get(0).getWidth();
+	    int cardHeight = cards.get(0).getHeight();
+	    int overlap = cardWidth / 2; // mitad de la carta se solapa
+
+	    int totalWidth = cardWidth + overlap * (cards.size() - 1);
+	    BufferedImage combined = new BufferedImage(totalWidth, cardHeight, BufferedImage.TYPE_INT_ARGB);
+	    Graphics2D g2d = combined.createGraphics();
+
+	    for (int i = 0; i < cards.size(); i++) {
+	        int x = i * overlap;
+	        g2d.drawImage(cards.get(i), x, 0, null);
+	    }
+
+	    g2d.dispose();
+	    return combined;
+	}
 	
 	public static int randomNumber(int min, int max) {
 	    if (min > max) {

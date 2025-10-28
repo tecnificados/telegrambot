@@ -30,7 +30,7 @@ public class SpriteDeckLoader {
         int cardWidth = totalAncho / COLS;
         int cardHeight = totalAlto / ROWS;
 
-        System.out.println("Tamaño detectado de cada carta: " + cardWidth + "x" + cardHeight);
+        //System.out.println("Tamaño detectado de cada carta: " + cardWidth + "x" + cardHeight);
 
         List<Carta> mazo = new ArrayList<Carta>();
 
