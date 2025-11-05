@@ -49,6 +49,7 @@ public class MySimpleBot extends TelegramLongPollingBot {
             logger.error("Error loading cards", e);
         }
 		
+		
 	}
 
 	@Override
@@ -234,4 +235,6 @@ public class MySimpleBot extends TelegramLongPollingBot {
         }
         conn.disconnect();
     }
+    
+    
 }

@@ -34,7 +34,7 @@ public class DewPoint {
 		}
 	}
 
-	private static List<String> dewPointConclusions(double lat, double lon) throws IOException, InterruptedException {
+	public static List<String> dewPointConclusions(double lat, double lon) throws IOException, InterruptedException {
 		List<String> conclusions = new ArrayList<String>();
 		String url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon
 				+ "&daily=temperature_2m_max,temperature_2m_min,dew_point_2m_max,dew_point_2m_min"
