@@ -78,6 +78,7 @@ public class MySimpleBot extends TelegramLongPollingBot {
             //TODO another refactor ASAP
             if (languageCode!=null && languageCode.equals("es") && (userMessageCleaned.equals("carta") || userMessageCleaned.equals("card"))) {
             	Carta carta = mazo.get(Utils.randomNumber(0, mazo.size()));
+            	//TODO extraer la siguiente linea a una función de la carta en multidioma
             	String nombreCarta=carta.getValor()+" de "+carta.getPalo();
 	            try
 	            {	            	
@@ -110,6 +111,8 @@ public class MySimpleBot extends TelegramLongPollingBot {
             	List<BufferedImage> images = pokerHand.stream().map(c -> c.getImagen()).toList();
                 BufferedImage combined = Utils.combineCardsOverlapping(images);            	
         
+                
+                //Combinar los nombres de cada carta
             	String nombreCarta="Una mano de poker";
 	            try
 	            {	     
