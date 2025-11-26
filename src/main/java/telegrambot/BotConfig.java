@@ -8,6 +8,8 @@ public class BotConfig {
 
     private String botUsername;
     private String botToken;
+    private String supabaseAPI;
+    private String supabaseURL;
 
     public BotConfig() {
         Properties prop = new Properties();
@@ -18,6 +20,8 @@ public class BotConfig {
             prop.load(input);
             botUsername = prop.getProperty("bot.username");
             botToken = prop.getProperty("bot.token");
+            supabaseAPI = prop.getProperty("bot.supabase.api");
+            supabaseURL = prop.getProperty("bot.supabase.url");
         } catch (IOException e) {
             throw new RuntimeException("Error cargando propiedades del bot", e);
         }
@@ -30,6 +34,14 @@ public class BotConfig {
     public String getBotToken() {
         return botToken;
     }
+
+	public String getSupabaseAPI() {
+		return supabaseAPI;
+	}
+
+	public String getSupabaseURL() {
+		return supabaseURL;
+	}
 
 	@Override
 	public String toString() {
