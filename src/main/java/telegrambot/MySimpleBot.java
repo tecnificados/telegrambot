@@ -13,8 +13,13 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +31,12 @@ import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import telegrambot.bean.IbexBean;
 import telegrambot.cards.Carta;
 import telegrambot.cards.SpriteDeckLoader;
 
@@ -137,9 +148,41 @@ public class MySimpleBot extends TelegramLongPollingBot {
 	                inputStream.close();
 	            } catch (IOException | TelegramApiException e) {
 	                logger.error("Error sending card", e);
-	            }            	
-            }
-            else {
+	            } 
+            } else if (languageCode!=null && languageCode.equals("es") && (userMessageCleaned.equals("ibex") || userMessageCleaned.equals("ibex 35"))) {
+            	String data = SupabaseRead.readData();
+            	data=data.replace("datet","date");
+            	Map<String, IbexBean> latest = new HashMap<String, IbexBean>();
+            	ObjectMapper mapper = new ObjectMapper();
+                IbexBean[] arr;
+				try {
+					arr = mapper.readValue(data, IbexBean[].class);
+					// Map<name, IbexData> con el más reciente
+	                latest = Arrays.stream(arr)
+	                	    .collect(Collectors.toMap(
+	                	        (IbexBean d) -> d.getName(),   // clave
+	                	        (IbexBean d) -> d,             // valor
+	                	        (d1, d2) -> d1.getDate().compareTo(d2.getDate()) > 0 ? d1 : d2 // merge function
+	                	    ));
+				} catch (Exception e) {
+					logger.error("Error reading json", e);
+				} 
+
+                // Lista final de datos más recientes
+                List<IbexBean> result = new ArrayList<>(latest.values());
+
+            	for (IbexBean actual:result) {
+                	message.setText(actual.output());
+                	try {
+    	                execute(message);
+    	            } catch (TelegramApiException e) {
+    	                logger.error("Error sending message", e);
+    	            }
+            	}
+                
+                
+            	
+            } else {
 	            if (languageCode!=null && languageCode.equals("es")) {
 	            	message.setText("Hola " +firstName+", me acabas de escribir: "+ userMessage);
 	            }else {
