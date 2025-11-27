@@ -16,17 +16,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import javax.imageio.ImageIO;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
 import telegrambot.bean.IbexBean;
 import telegrambot.cards.Carta;
 import telegrambot.cards.SpriteDeckLoader;
@@ -61,9 +67,37 @@ public class MySimpleBot extends TelegramLongPollingBot {
    
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
+    	 
+    	//Contestación por botones
+    	if (update.hasCallbackQuery()) {
+    		Long chatId = update.getCallbackQuery().getMessage().getChatId();
+            String data = update.getCallbackQuery().getData();
+            Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+            
+            SendMessage message = new SendMessage();
+            message.setChatId(chatId);
+            if (data.equals("COND_SI")) { 
+ 	            message.setText("Has elegido si");
+            }else  { 
+ 	            message.setText("Has elegido no");
+            }
+            sendMessage(message);
+            
+         // 2️⃣ Deshabilitar los botones
+            EditMessageReplyMarkup editMarkup = new EditMessageReplyMarkup();
+            editMarkup.setChatId(chatId.toString());
+            editMarkup.setMessageId(messageId);
+            editMarkup.setReplyMarkup(null);  // borra los botones
+
+            try {
+                execute(editMarkup);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        }
+    	else if (update.hasMessage() && update.getMessage().hasText()) {
             String userMessage = update.getMessage().getText();
-            String chatId = update.getMessage().getChatId().toString();            
+            String chatId = update.getMessage().getChatId().toString();    
           
             User user = update.getMessage().getFrom();            
             //Long userId = user.getId();
@@ -152,21 +186,43 @@ public class MySimpleBot extends TelegramLongPollingBot {
         		    }
         			sendMessage(message, output);
         		}
-            } else {
+            } else if (languageCode!=null && languageCode.equals("es") && (userMessageCleaned.equals("prueba") || userMessageCleaned.equals("test"))) {
+            	SendMessage msg = new SendMessage();
+            	msg.setChatId(chatId);
+            	msg.setText("¿Qué opinas?");
+
+            	InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+
+            	List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+
+            	List<InlineKeyboardButton> row = new ArrayList<>();
+            	row.add(InlineKeyboardButton.builder()
+            	        .text("Sí, condensación ❄")
+            	        .callbackData("COND_SI")
+            	        .build());
+
+            	row.add(InlineKeyboardButton.builder()
+            	        .text("No hay condensación")
+            	        .callbackData("COND_NO")
+            	        .build());
+
+            	rows.add(row);
+            	markup.setKeyboard(rows);
+
+            	msg.setReplyMarkup(markup);
+            	sendMessage(msg);
+
+	        } else {
 	            if (languageCode!=null && languageCode.equals("es")) {
 	            	message.setText("Hola " +firstName+", me acabas de escribir: "+ userMessage);
 	            }else {
 	            	message.setText("Hello " +firstName+", you just messaged me this: "+ userMessage);	
 	            }
-	            try {
-	                execute(message);
-	            } catch (TelegramApiException e) {
-	                logger.error("Error sending message", e);
-	            }
+	            sendMessage(message);
             }           
         }else if (update.hasMessage() && update.getMessage().hasLocation()) {
+        	String chatId = update.getMessage().getChatId().toString(); 
             Location userLocation = update.getMessage().getLocation();
-            String chatId = update.getMessage().getChatId().toString();
             
             String coordinates = Utils.coordinateToGeojsonPoint(userLocation.getLatitude(), userLocation.getLongitude()); 
                                   
@@ -210,7 +266,13 @@ public class MySimpleBot extends TelegramLongPollingBot {
     }
 
 	
-
+    private void sendMessage(SendMessage message) {
+		try {
+		    execute(message);
+		} catch (TelegramApiException e) {
+		    logger.error("Error sending message", e);
+		}
+	}
 	
 
 	private void sendMessage(SendMessage message, String output) {

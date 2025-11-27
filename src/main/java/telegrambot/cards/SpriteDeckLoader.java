@@ -17,12 +17,10 @@ public class SpriteDeckLoader {
             "As", "2", "3", "4", "5", "6", "7", "8", "9", "10", "Jota", "Reina", "Rey"
     };
 
-    
-
     public static List<Carta> loadDeck() throws IOException {
         // Carga desde resources
         BufferedImage spriteSheet = ImageIO.read(
-                SpriteDeckLoader.class.getResourceAsStream("/cards2.png")
+                SpriteDeckLoader.class.getResourceAsStream("/cards3.png")
         );
 
         int totalAncho = spriteSheet.getWidth();
