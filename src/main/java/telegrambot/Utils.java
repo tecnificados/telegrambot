@@ -1,17 +1,21 @@
 package telegrambot;
 
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
@@ -24,6 +28,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import telegrambot.bean.IbexBean;
 
 public class Utils {
 	
@@ -181,4 +187,37 @@ public class Utils {
         
         return output.getAbsolutePath();
     }
+    
+    static Map<Character, List<IbexBean>> formatIbexData(String data) {
+		Map<String, IbexBean> latest = new HashMap<String, IbexBean>();
+		ObjectMapper mapper = new ObjectMapper();
+		IbexBean[] arr;
+		try {
+			arr = mapper.readValue(data, IbexBean[].class);
+			// Map<name, IbexData> con el más reciente
+		    latest = Arrays.stream(arr)
+		    	    .collect(Collectors.toMap(
+		    	        (IbexBean d) -> d.getName(),   // clave
+		    	        (IbexBean d) -> d,             // valor
+		    	        (d1, d2) -> d1.getDate().compareTo(d2.getDate()) > 0 ? d1 : d2 // merge function
+		    	    ));
+		} catch (Exception e) {
+			logger.error("Error reading json", e);
+		} 
+
+		// Lista final de datos más recientes
+		List<IbexBean> result = new ArrayList<>(latest.values());
+		
+		// Ordenar alfabéticamente por nombre
+		result.sort(Comparator.comparing(IbexBean::getName));
+		
+		// Agrupar por primera letra
+		Map<Character, List<IbexBean>> grupos = result.stream()
+		        .collect(Collectors.groupingBy(
+		                d -> d.getName().charAt(0),      // clave: primera letra
+		                TreeMap::new,                    // para que las claves estén ordenadas
+		                Collectors.toList()              // valor: lista de IbexBean
+		));
+		return grupos;
+	}
 }

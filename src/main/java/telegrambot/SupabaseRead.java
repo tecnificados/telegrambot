@@ -1,6 +1,5 @@
 package telegrambot;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -13,7 +12,7 @@ public class SupabaseRead {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SupabaseRead.class);
 	
-	public static String readData() {
+	public static String readIbexData() {
 		String out="";
 		BotConfig botConfig = new BotConfig();
     	
@@ -33,6 +32,7 @@ public class SupabaseRead {
 		try {
 			response = client.send(request, HttpResponse.BodyHandlers.ofString());
 			out=response.body();
+			out=out.replace("datet","date");
 			logger.info("Status: " + response.statusCode());
 		    logger.info("Response: " + response.body());
 		} catch (Exception e) {
@@ -42,7 +42,7 @@ public class SupabaseRead {
 	}
 	
     public static void main(String[] args) throws Exception {
-    	String data=readData();
+    	String data=readIbexData();
     	logger.info(data);
     }
 }

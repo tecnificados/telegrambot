@@ -1,6 +1,17 @@
 package telegrambot.bean;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class IbexBean {
+	
+	private static final Logger logger = LoggerFactory.getLogger(IbexBean.class);
+	
+	static SimpleDateFormat formatterOuput = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+	static SimpleDateFormat formatterInput=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+	
 	String name;
 	String date;
 	float value;
@@ -35,7 +46,19 @@ public class IbexBean {
 	}
 	
 	public String output() {
-		return name + ", " + date + ", " + value ;
+		String coolDate="";
+		try {
+			Date date2 = formatterInput.parse(date);
+			coolDate=formatterOuput.format(date2);
+		}
+		catch (Exception e) {
+			logger.error("Error parsing date", e);
+		}
+		
+		//return name + ", " + date + ", " + value ;
+		 return "<b>" + name + "</b>\n" +
+         "📅 " + coolDate + " " +
+         "💶 <b>" + String.format("%.2f", value) + "</b>\n";
 	}
 
 }
