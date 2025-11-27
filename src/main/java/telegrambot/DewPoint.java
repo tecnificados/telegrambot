@@ -17,23 +17,6 @@ public class DewPoint {
 	
 	private static final Logger logger = LoggerFactory.getLogger(DewPoint.class);
 
-	public static void main(String[] args)  {
-		double lat = 40.4168;
-		double lon = -3.7038;
-
-		List<String> dewPointConclusions = new ArrayList<String>();
-		try {
-			dewPointConclusions = dewPointConclusions(lat, lon);
-		} catch (IOException | InterruptedException e) {
-			logger.error("Error on dewPoints", e);
-			e.printStackTrace();
-		} 
-		
-		for (String actual:dewPointConclusions) {
-			logger.info(actual);
-		}
-	}
-
 	public static List<String> dewPointConclusions(double lat, double lon) throws IOException, InterruptedException {
 		List<String> conclusions = new ArrayList<String>();
 		String url = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon
@@ -49,7 +32,8 @@ public class DewPoint {
 		WeatherData data = gson.fromJson(response.body(), WeatherData.class);
 
 		// Mostrar resultados
-		for (int i = 0; i < data.getDaily().getTime().length; i++) {
+		for (int i = 0; i < 2; i++) {
+		//for (int i = 0; i < data.getDaily().getTime().length; i++) {
 			String fecha = data.getDaily().getTime()[i];
 			double tmax = data.getDaily().getTemperatureMax()[i];
 			double tmin = data.getDaily().getTemperatureMin()[i];
@@ -59,17 +43,40 @@ public class DewPoint {
 			boolean condensacion = tmin <= dewMax;
 
 			Locale localeEs = Locale.forLanguageTag("es-ES");
-
+/*
 			String actualConclusion = "Día " + fecha + " -> Tmax=" + String.format(localeEs, "%.1f", tmax) + "°C, "
 					+ "Tmin=" + String.format(localeEs, "%.1f", tmin) + "°C, " + "Punto de rocío="
 					+ String.format(localeEs, "%.1f", dewMax) + "°C → "
 					+ (condensacion ? "❄ Condensación probable" : "No hay condensación");
-
+*/
+			String actualConclusion = "Día " + fecha + "\n"
+			        + "• Tmax: " + String.format(localeEs, "%.1f", tmax) + " °C\n"
+			        + "• Tmin: " + String.format(localeEs, "%.1f", tmin) + " °C\n"
+			        + "• Punto de rocío: " + String.format(localeEs, "%.1f", dewMax) + " °C\n"
+			        + "→ " + (condensacion ? "❄ Condensación probable" : "No hay condensación");
+			
 			conclusions.add(actualConclusion);
 
 		}
 
 		return conclusions;
+	}
+	
+	public static void main(String[] args)  {
+		double lat = 40.4168;
+		double lon = -3.7038;
+
+		List<String> dewPointConclusions = new ArrayList<String>();
+		try {
+			dewPointConclusions = dewPointConclusions(lat, lon);
+		} catch (IOException | InterruptedException e) {
+			logger.error("Error on dewPoints", e);
+			e.printStackTrace();
+		} 
+		
+		for (String actual:dewPointConclusions) {
+			logger.info(actual);
+		}
 	}
 
 }
