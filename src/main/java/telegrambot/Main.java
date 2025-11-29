@@ -1,13 +1,11 @@
 package telegrambot;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -35,20 +33,7 @@ public class Main {
 		}
 	}
 	
-	private static long getDelayUntilNextExecution(LocalTime targetTime) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime nextRun = now.withHour(targetTime.getHour())
-                                   .withMinute(targetTime.getMinute())
-                                   .withSecond(0)
-                                   .withNano(0);
-
-        if (now.isAfter(nextRun)) {
-            nextRun = nextRun.plusDays(1);
-        }
-
-        Duration duration = Duration.between(now, nextRun);
-        return duration.getSeconds();
-    }
+	
     
     // 🕒 Programa el envío diario a las 12:00
     public static void scheduleDailyMessage(MySimpleBot bot, String chatId) {
@@ -86,7 +71,8 @@ public class Main {
         };
 
         // Calcular tiempo inicial hasta las 12:00 de hoy o mañana
-        long initialDelay = getDelayUntilNextExecution(LocalTime.of(12, 00));
+        ZoneId zone = ZoneId.of("Europe/Madrid");
+        long initialDelay = Utils.getDelayUntilNextExecution(LocalTime.of(12, 0), zone);
         long period = TimeUnit.DAYS.toSeconds(1);
 
         scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.SECONDS);

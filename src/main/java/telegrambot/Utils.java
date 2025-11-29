@@ -5,6 +5,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -219,5 +223,16 @@ public class Utils {
 		                Collectors.toList()              // valor: lista de IbexBean
 		));
 		return grupos;
+	}
+    
+    public static long getDelayUntilNextExecution(LocalTime targetTime, ZoneId zone) {
+	    ZonedDateTime now = ZonedDateTime.now(zone);
+	    ZonedDateTime nextRun = now.with(targetTime);
+	    
+	    if (now.isAfter(nextRun)) {
+	        nextRun = nextRun.plusDays(1);
+	    }
+	    
+	    return Duration.between(now, nextRun).toMillis();
 	}
 }
