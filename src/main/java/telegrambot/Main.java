@@ -72,7 +72,7 @@ public class Main {
 
         // Calcular tiempo inicial hasta las 12:00 de hoy o mañana
         ZoneId zone = ZoneId.of("Europe/Madrid");
-        long initialDelay = Utils.getDelayUntilNextExecution(LocalTime.of(12, 0), zone);
+        long initialDelay = Utils.getDelayUntilNextExecution(LocalTime.of(12, 00), zone);
         long period = TimeUnit.DAYS.toSeconds(1);
 
         scheduler.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.SECONDS);

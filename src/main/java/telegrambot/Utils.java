@@ -233,6 +233,6 @@ public class Utils {
 	        nextRun = nextRun.plusDays(1);
 	    }
 	    
-	    return Duration.between(now, nextRun).toMillis();
+	    return Duration.between(now, nextRun).getSeconds();
 	}
 }
