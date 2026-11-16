@@ -2,3 +2,5 @@
 .classpath
 .project
 target/
+src/main/resources/bot_data.properties
+logs/

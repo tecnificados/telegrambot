@@ -27,7 +27,7 @@ public class Main {
 			MySimpleBot mySimpleBot = new MySimpleBot(config.getBotToken(), config.getBotUsername());
 			botsApi.registerBot(mySimpleBot);
 			
-			scheduleDailyMessage(mySimpleBot, "1329746834");
+			scheduleDailyMessage(mySimpleBot, config.getDailyChatIds());
 		} catch (Exception e) {
 			logger.error("Error running bot", e);
 		}
@@ -36,7 +36,12 @@ public class Main {
 	
     
     // 🕒 Programa el envío diario a las 12:00
-    public static void scheduleDailyMessage(MySimpleBot bot, String chatId) {
+    public static void scheduleDailyMessage(MySimpleBot bot, List<String> chatIds) {
+        if (chatIds == null || chatIds.isEmpty()) {
+            logger.warn("No hay identificadores configurados para el mensaje meteorológico diario");
+            return;
+        }
+
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);                
         Runnable task = () -> {
         	
@@ -49,24 +54,27 @@ public class Main {
     			logger.error("Error on dewPoints", e);
     		} 
         	
-            try {
-                SendMessage message = new SendMessage();
-                message.setChatId(chatId);
-                
-                if (dewPointConclusions==null ||dewPointConclusions.size()==0) {
-                	message.setText("🌞 ¡Hola! Este es tu mensaje diario de las 12:00.");
-                } else {
-                	String finalMessage="🌞 ¡Hola! Este es tu mensaje diario de las 12:00. \n\n";
-                	for (String actual:dewPointConclusions) {
-                		finalMessage+=actual+"\n";
-                	}
-                	message.setText(finalMessage);
-                }               
-                              
-                bot.execute(message);
-                logger.info("Mensaje enviado a las 12:00");
-            } catch (TelegramApiException e) {
-                logger.error("Error sending message in scheduler", e);
+            String finalMessage;
+            if (dewPointConclusions == null || dewPointConclusions.isEmpty()) {
+                finalMessage = "🌞 ¡Hola! Este es tu mensaje diario de las 12:00.";
+            } else {
+                StringBuilder messageBuilder = new StringBuilder("🌞 ¡Hola! Este es tu mensaje diario de las 12:00.\n\n");
+                for (String conclusion : dewPointConclusions) {
+                    messageBuilder.append(conclusion).append('\n');
+                }
+                finalMessage = messageBuilder.toString();
+            }
+
+            for (String chatId : chatIds) {
+                try {
+                    SendMessage message = new SendMessage();
+                    message.setChatId(chatId);
+                    message.setText(finalMessage);
+                    bot.execute(message);
+                    logger.info("Mensaje meteorológico diario enviado");
+                } catch (TelegramApiException e) {
+                    logger.error("Error enviando mensaje meteorológico diario", e);
+                }
             }
         };
 

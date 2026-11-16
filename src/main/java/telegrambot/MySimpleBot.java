@@ -113,7 +113,26 @@ public class MySimpleBot extends TelegramLongPollingBot {
             String userMessageCleaned=userMessage.toLowerCase().trim();            
             
             //TODO another refactor ASAP
-            if (languageCode!=null && languageCode.equals("es") && (userMessageCleaned.equals("carta") || userMessageCleaned.equals("card"))) {
+            if (isStartCommand(userMessageCleaned)) {
+                if (languageCode != null && languageCode.equals("es")) {
+                    message.setText("¡Hola " + firstName + "! Estos son los comandos y funciones disponibles:\n\n"
+                            + "• carta (o card): recibes una carta aleatoria.\n"
+                            + "• mano (o hand): recibes una mano de cinco cartas.\n"
+                            + "• ibex (o ibex 35): consulta los últimos valores del IBEX 35.\n"
+                            + "• prueba (o test): muestra botones para indicar si hay condensación.\n"
+                            + "• Comparte una ubicación: recibes las coordenadas y, si es posible, una imagen del mapa.\n\n"
+                            + "También envío un resumen meteorológico diario.");
+                } else {
+                    message.setText("Hello " + firstName + "! This bot supports these commands and features:\n\n"
+                            + "• carta (or card): get a random playing card.\n"
+                            + "• mano (or hand): get a five-card hand.\n"
+                            + "• ibex (or ibex 35): get the latest IBEX 35 values.\n"
+                            + "• prueba (or test): show buttons to report whether condensation is present.\n"
+                            + "• Share a location: get its coordinates and, when available, a map image.\n\n"
+                            + "A daily weather summary is also sent automatically.");
+                }
+                sendMessage(message);
+            } else if (languageCode!=null && languageCode.equals("es") && (userMessageCleaned.equals("carta") || userMessageCleaned.equals("card"))) {
             	Carta carta = mazo.get(Utils.randomNumber(0, mazo.size()));
             	//TODO extraer la siguiente linea a una función de la carta en multidioma
             	String nombreCarta=carta.getValor()+" de "+carta.getPalo();
@@ -273,6 +292,11 @@ public class MySimpleBot extends TelegramLongPollingBot {
 		    logger.error("Error sending message", e);
 		}
 	}
+
+    private boolean isStartCommand(String text) {
+        String[] parts = text.split("\\s+", 2);
+        return parts[0].equals("/start") || parts[0].matches("/start@[a-z0-9_]+");
+    }
 	
 
 	private void sendMessage(SendMessage message, String output) {

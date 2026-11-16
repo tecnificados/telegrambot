@@ -2,6 +2,8 @@ package telegrambot;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 public class BotConfig {
@@ -10,6 +12,7 @@ public class BotConfig {
     private String botToken;
     private String supabaseAPI;
     private String supabaseURL;
+    private List<String> dailyChatIds;
 
     public BotConfig() {
         Properties prop = new Properties();
@@ -22,6 +25,10 @@ public class BotConfig {
             botToken = prop.getProperty("bot.token");
             supabaseAPI = prop.getProperty("bot.supabase.api");
             supabaseURL = prop.getProperty("bot.supabase.url");
+            dailyChatIds = Arrays.stream(prop.getProperty("bot.daily.chat.ids", "").split(","))
+                    .map(String::trim)
+                    .filter(chatId -> !chatId.isEmpty())
+                    .toList();
         } catch (IOException e) {
             throw new RuntimeException("Error cargando propiedades del bot", e);
         }
@@ -42,6 +49,10 @@ public class BotConfig {
 	public String getSupabaseURL() {
 		return supabaseURL;
 	}
+
+    public List<String> getDailyChatIds() {
+        return dailyChatIds;
+    }
 
 	@Override
 	public String toString() {
