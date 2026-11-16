@@ -1,7 +1,11 @@
 package telegrambot;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -16,11 +20,20 @@ public class BotConfig {
 
     public BotConfig() {
         Properties prop = new Properties();
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("bot.properties")) {
-            if (input == null) {
-                throw new RuntimeException("File bot.properties not found");
+        try {
+            Path codeLocation = Path.of(BotConfig.class.getProtectionDomain()
+                    .getCodeSource().getLocation().toURI());
+            Path configPath = Files.isDirectory(codeLocation)
+                    ? codeLocation.resolve("bot.properties")
+                    : codeLocation.resolveSibling("bot.properties");
+
+            if (!Files.isRegularFile(configPath)) {
+                throw new IllegalStateException("No se encontró bot.properties junto al programa: " + configPath);
             }
-            prop.load(input);
+
+            try (Reader reader = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
+                prop.load(reader);
+            }
             botUsername = prop.getProperty("bot.username");
             botToken = prop.getProperty("bot.token");
             supabaseAPI = prop.getProperty("bot.supabase.api");
@@ -29,7 +42,7 @@ public class BotConfig {
                     .map(String::trim)
                     .filter(chatId -> !chatId.isEmpty())
                     .toList();
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             throw new RuntimeException("Error cargando propiedades del bot", e);
         }
     }
@@ -56,7 +69,7 @@ public class BotConfig {
 
 	@Override
 	public String toString() {
-		return "BotConfig [botUsername=" + botUsername + ", botToken=" + botToken + "]";
+		return "BotConfig [botUsername=" + botUsername + "]";
 	}
     
     

@@ -36,7 +36,7 @@ Al arrancar, el bot programa un mensaje diario a las 12:00 en la zona `Europe/Ma
 
 ## Configuración
 
-La aplicación carga `bot.properties` desde el classpath (`src/main/resources/bot.properties` en este proyecto). Debe contener estas propiedades:
+La aplicación carga `bot.properties` desde el mismo directorio que el JAR. Maven excluye este archivo del JAR para mantener la configuración fuera del artefacto. Crea o copia `bot.properties` junto al JAR en el servidor. Debe contener estas propiedades:
 
 ```properties
 bot.username=nombre_del_bot
@@ -48,7 +48,7 @@ bot.daily.chat.ids=123456789,987654321
 
 `bot.daily.chat.ids` acepta uno o varios identificadores de chat separados por comas. Se eliminan los espacios alrededor de cada identificador. Si la propiedad está vacía o falta, el bot no programa el envío diario.
 
-No publiques ni compartas el token o la clave de Supabase. El archivo de propiedades se incluye como recurso al empaquetar la aplicación; para despliegues, evita incorporar secretos al JAR y adapta la carga de configuración para usar variables de entorno o un gestor de secretos.
+No publiques ni compartas el token o la clave de Supabase. Mantén el archivo externo junto al JAR y restringe su acceso en el servidor.
 
 La consulta de mercado espera una tabla/recurso REST de Supabase llamado `ibexdata` con los campos `name`, `value` y `datet`, accesible mediante la clave configurada. El código transforma `datet` en `date` para procesar los datos.
 
@@ -61,6 +61,8 @@ mvn clean package
 ```
 
 Maven genera un JAR ejecutable con dependencias en `target/telegrambot-0.0.1-SNAPSHOT-jar-with-dependencies.jar`.
+
+Copia `bot.properties` al directorio `target` (junto al JAR) antes de desplegarlo. El programa busca la configuración junto a su ubicación, así que puedes arrancarlo desde cualquier directorio:
 
 ```bash
 java -jar target/telegrambot-0.0.1-SNAPSHOT-jar-with-dependencies.jar
